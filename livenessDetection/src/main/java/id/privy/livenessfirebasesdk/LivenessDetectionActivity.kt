@@ -15,8 +15,7 @@ import id.privy.livenessfirebasesdk.event.LivenessEventProvider
 import id.privy.livenessfirebasesdk.vision.VisionDetectionProcessor
 import kotlinx.android.synthetic.main.activity_liveness_detection.*
 import java.io.IOException
-import java.util.Random
-import kotlin.collections.ArrayList
+import java.util.*
 
 
 class LivenessDetectionActivity : AppCompatActivity() {
@@ -139,7 +138,11 @@ class LivenessDetectionActivity : AppCompatActivity() {
     fun navigateBack(success: Boolean, bitmap: Bitmap?) {
         if (bitmap != null) {
             if (success) {
-                LivenessApp.setCameraResultData(BitmapUtils.processBitmap(bitmap))
+// get
+
+                // get
+                val s: Int = (this.application as MyApplication).cameraFacingSide
+                LivenessApp.setCameraResultData(BitmapUtils.processBitmap(bitmap, s))
                 finish()
             } else {
                 LivenessApp.setCameraResultData(null)

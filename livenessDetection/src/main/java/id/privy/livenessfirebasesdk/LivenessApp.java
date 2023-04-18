@@ -16,9 +16,10 @@ public class LivenessApp {
 
     private Bundle bundle;
 
-    private LivenessApp(Context context, boolean isDebug, String successText, String instructions, String[] motionInstructions) {
+    private LivenessApp(Context context, boolean isDebug, boolean cameraPart, String successText, String instructions, String[] motionInstructions) {
         Bundle bundle = new Bundle();
         bundle.putBoolean(Constant.Keys.IS_DEBUG, isDebug);
+        bundle.putBoolean("camera", cameraPart);
         bundle.putString(Constant.Keys.SUCCESS_TEXT, successText);
         bundle.putString(Constant.Keys.INSTRUCTION_TEXT, instructions);
         bundle.putStringArray(Constant.Keys.MOTION_INSTRUCTIONS, motionInstructions);
@@ -55,6 +56,8 @@ public class LivenessApp {
 
         private boolean isDebug;
 
+        private boolean cameraPart;
+
         private String successText;
 
         private String instructions;
@@ -64,6 +67,7 @@ public class LivenessApp {
         public Builder(Context context) {
             this.context = context;
             this.isDebug = false;
+            this.cameraPart = false;
             this.successText = context.getString(R.string.success_text);
             this.successText = context.getString(R.string.instructions);
             this.leftInstruction = context.getString(R.string.motion_instruction_left);
@@ -72,6 +76,11 @@ public class LivenessApp {
 
         public LivenessApp.Builder setDebugMode(boolean isDebug) {
             this.isDebug = isDebug;
+            return this;
+        }
+
+        public LivenessApp.Builder setCameraPart(boolean cameraPart) {
+            this.cameraPart = cameraPart;
             return this;
         }
 
@@ -93,7 +102,7 @@ public class LivenessApp {
 
         public LivenessApp build() {
             String[] motionInstructions = new String[]{leftInstruction, rightInstruction};
-            return new LivenessApp(context, isDebug, successText, instructions, motionInstructions);
+            return new LivenessApp(context, isDebug,cameraPart, successText, instructions, motionInstructions);
         }
 
     }

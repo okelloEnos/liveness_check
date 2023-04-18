@@ -7,9 +7,24 @@
         android:background="@android:color/black"
         tools:context=".SimpleLivenessActivity">
 
-
+<!--    <Button-->
+<!--        android:id="@+id/switch_camera_button1"-->
+<!--        android:layout_width="42dp"-->
+<!--        android:layout_height="55dp"-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:layout_alignParentTop="@id/cameraPreview"-->
+<!--        android:layout_alignParentRight="true"-->
+<!--        android:layout_marginLeft="16dp"-->
+<!--        android:layout_marginRight="16dp"-->
+<!--        android:layout_marginBottom="40dp"-->
+<!--        android:background="@mipmap/switch_camera"-->
+<!--        android:gravity="center"-->
+<!--        android:textColor="@android:color/white"-->
+<!--        android:textSize="20sp"-->
+<!--        android:textStyle="bold" />-->
     <id.privy.livenessfirebasesdk.common.CameraSourcePreview
             android:id="@+id/cameraPreview"
+
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -28,7 +43,6 @@
             android:layout_height="match_parent"
             android:scaleType="fitXY"
             android:background="@mipmap/background_selfie"/>
-
     <TextView
             android:id="@+id/motionInstruction"
             android:layout_width="match_parent"
@@ -42,7 +56,6 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginBottom="40dp"/>
-
     <TextView
             android:id="@+id/instructions"
             android:layout_width="match_parent"
@@ -55,4 +68,5 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginBottom="40dp"/>
+
 </RelativeLayout>

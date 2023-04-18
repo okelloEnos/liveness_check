@@ -15,6 +15,8 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 
+import id.privy.livenessfirebasesdk.SimpleLivenessActivity;
+
 /** Utils functions for bitmap conversions. */
 public class BitmapUtils {
 
@@ -72,9 +74,17 @@ public class BitmapUtils {
         }
     }
 
-    public static Bitmap processBitmap(Bitmap bitmap) {
+    public static Bitmap processBitmap(Bitmap bitmap, int facing) {
         Matrix matrix = new Matrix();
-        matrix.postRotate(270);
+//        System.out.print("ssssssssssssssssssssssssssssssss :: facing: " + facing);
+        Log.i("okello", "ssssssssssssssssssssssssssssssss :: facing: " + facing);
+if(facing == 0){
+    matrix.postRotate(90);
+}
+else{
+    matrix.postRotate(270);
+}
+
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 

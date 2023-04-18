@@ -4,18 +4,21 @@ import android.Manifest
 import android.arch.lifecycle.Observer
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Toast
 import id.privy.livenessfirebasesdk.common.*
+import id.privy.livenessfirebasesdk.entity.LivenessItem
 import id.privy.livenessfirebasesdk.event.LivenessEventProvider
+import id.privy.livenessfirebasesdk.listener.PrivyCameraLivenessCallBackListener
 import id.privy.livenessfirebasesdk.vision.VisionDetectionProcessor
 import id.privy.livenessfirebasesdk.vision.VisionDetectionProcessor.Motion
 import kotlinx.android.synthetic.main.activity_simple_liveness.*
 import java.io.IOException
 import java.util.*
+
 
 class SimpleLivenessActivity : AppCompatActivity() {
 
@@ -26,6 +29,8 @@ class SimpleLivenessActivity : AppCompatActivity() {
     internal var graphicOverlay: GraphicOverlay? = null
 
     private var cameraSource: CameraSource? = null
+
+    private var passedCameraSide: Boolean = false
 
     private var visionDetectionProcessor: VisionDetectionProcessor? = null
 
@@ -48,17 +53,51 @@ class SimpleLivenessActivity : AppCompatActivity() {
             val b = intent.extras!!
             successText = b.getString(Constant.Keys.SUCCESS_TEXT, getString(R.string.success_text))
             isDebug = b.getBoolean(Constant.Keys.IS_DEBUG, false)
+            passedCameraSide = b.getBoolean("camera", false)
             instructions.text = b.getString(Constant.Keys.INSTRUCTION_TEXT, getString(R.string.instructions))
             motionInstructions = b.getStringArray(Constant.Keys.MOTION_INSTRUCTIONS)
         }
 
         if (PermissionUtil.with(this).isCameraPermissionGranted) {
-            createCameraSource()
+            createCameraSource(passedCameraSide)
             startHeadShakeChallenge()
         }
         else {
             PermissionUtil.requestPermission(this, 1, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
         }
+
+//        switch_camera_button1.setOnClickListener {
+//            passedCameraSide = !passedCameraSide
+//            preview?.stop()
+//            LivenessEventProvider.getEventLiveData().postValue(null)
+//            cameraSource!!.release()
+////            cameraSource = null
+//            createCameraSource(passedCameraSide)
+////            startHeadShakeChallenge()
+////            startCameraSource()
+//            Toast.makeText(this, "Camera Switch up : $passedCameraSide", Toast.LENGTH_LONG).show()
+////            val livenessApp = LivenessApp.Builder(this)
+////                .setDebugMode(false)
+////                .setCameraPart(passedCameraSide)
+////                .setMotionInstruction("Look left", "Look left")
+////                .setSuccessText("Successfull! Please look at the camera again to take a photo")
+////                .setInstructions("Look at the camera and place the face on the green circle")
+////                .build()
+//
+////            livenessApp.start(object : PrivyCameraLivenessCallBackListener {
+////
+////                override fun success(livenessItem: LivenessItem?) {
+////                    if (livenessItem != null) {
+//////                        test_image.setImageBitmap(livenessItem.imageBitmap)
+////                    }
+////                }
+////
+////                override fun failed(t: Throwable?) {
+////
+////                }
+////
+////            })
+//        }
 
         LivenessEventProvider.getEventLiveData().observe(this, Observer {
             it?.let {
@@ -77,8 +116,10 @@ class SimpleLivenessActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        createCameraSource()
+        createCameraSource(passedCameraSide)
     }
+
+
 
     override fun onResume() {
         super.onResume()
@@ -95,12 +136,23 @@ class SimpleLivenessActivity : AppCompatActivity() {
         super.onDestroy()
         cameraSource!!.release()
     }
-
-    private fun createCameraSource() {
+// 0 for back and 1 for front
+    private fun createCameraSource(boolean: Boolean) {
         // If there's no existing cameraSource, create one.
-        if (cameraSource == null) {
+    var cameraSide: Int = 0
+
+    if (boolean) {
+        cameraSide = 0
+    } else {
+        cameraSide = 1
+    }
+
+    // set
+    (this.application as MyApplication).cameraFacingSide = cameraSide
+    if (cameraSource == null) {
             cameraSource = CameraSource(this, graphicOverlay)
-            cameraSource!!.setFacing(CameraSource.CAMERA_FACING_FRONT)
+            cameraSource!!.setFacing(cameraSide)
+//        startCameraSource()
         }
 
         val motion = Motion.values()[Random().nextInt(Motion.values().size)]
@@ -131,12 +183,18 @@ class SimpleLivenessActivity : AppCompatActivity() {
     }
 
     private fun startCameraSource() {
+
         if (cameraSource != null) {
             try {
                 if (preview == null) {
                     Log.d(TAG, "resume: Preview is null")
                 }
                 preview!!.start(cameraSource, graphicOverlay)
+                Handler().postDelayed({
+                                      cameraSource!!.release()
+                    LivenessApp.setCameraResultData(null)
+                    finish()
+                }, 10000)
             } catch (e: IOException) {
                 Log.e(TAG, "Unable to start camera source.", e)
                 cameraSource!!.release()
@@ -148,7 +206,9 @@ class SimpleLivenessActivity : AppCompatActivity() {
     fun navigateBack(success: Boolean, bitmap: Bitmap?) {
         if (bitmap != null) {
             if (success) {
-                LivenessApp.setCameraResultData(BitmapUtils.processBitmap(bitmap))
+                // get
+                val s: Int = (this.application as MyApplication).cameraFacingSide
+                LivenessApp.setCameraResultData(BitmapUtils.processBitmap(bitmap, s))
                 finish()
             }
             else {
@@ -177,7 +237,7 @@ class SimpleLivenessActivity : AppCompatActivity() {
                 cameraSource!!.takePicture(null, com.google.android.gms.vision.CameraSource.PictureCallback {
                     navigateBack(true, BitmapFactory.decodeByteArray(it, 0, it.size))
                 })
-            }, 500)
+            }, 200)
         }
     }
 
