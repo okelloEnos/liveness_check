@@ -8,6 +8,7 @@ import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
+import android.hardware.SensorManager;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 import android.util.Log;
@@ -515,19 +516,32 @@ public class CameraSource {
 
         int angle;
         int displayAngle;
+
+        SensorManager sensorManager = (SensorManager) activity.getSystemService(Context.SENSOR_SERVICE);
+        CameraOrientationHelper cameraOrientationHelper = new CameraOrientationHelper(sensorManager, cameraInfo);
+        cameraOrientationHelper.start();
+        OrientationHelper orientationHelper = new OrientationHelper(sensorManager, cameraInfo);
+        orientationHelper.start();
+
+// ...
+
+        int sensorOrientationDegrees = cameraOrientationHelper.getCurrentOrientation();
+        int deviceOrientationDegrees = orientationHelper.getCurrentOrientation();
         if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             angle = (cameraInfo.orientation + degrees) % 360;
-            displayAngle = (360 - angle) % 360; // compensate for it being mirrored
+            displayAngle = (360 - angle) % 360; // co
+            rotation = (sensorOrientationDegrees - deviceOrientationDegrees * 1 + 360) % 360;// mpensate for it being mirrored
         } else { // back-facing
             angle = (cameraInfo.orientation - degrees + 360) % 360;
             displayAngle = angle;
+            rotation = (sensorOrientationDegrees - deviceOrientationDegrees * -1 + 360) % 360;
         }
 
         // This corresponds to the rotation constants.
         this.rotation = angle / 90;
 
-        camera.setDisplayOrientation(displayAngle);
-        parameters.setRotation(angle);
+//        camera.setDisplayOrientation(displayAngle);
+//        parameters.setRotation(angle);
     }
 
     /**

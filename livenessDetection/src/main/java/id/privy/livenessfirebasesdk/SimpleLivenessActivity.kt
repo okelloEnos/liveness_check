@@ -194,7 +194,7 @@ class SimpleLivenessActivity : AppCompatActivity() {
                                       cameraSource!!.release()
                     LivenessApp.setCameraResultData(null)
                     finish()
-                }, 10000)
+                }, 1000000000000000000)
             } catch (e: IOException) {
                 Log.e(TAG, "Unable to start camera source.", e)
                 cameraSource!!.release()
